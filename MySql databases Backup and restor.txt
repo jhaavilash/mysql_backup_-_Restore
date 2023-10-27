@@ -1,0 +1,104 @@
+# MySql databases Backup and restore process
+systemctl status mysql
+mysql -u root -p
+Enter password
+
+show databses;
+use databases-name;
+show tables;
+
+#Backup process
+mysqldump -u root -p --all-databases > mysql_dbBackup1.sql
+ls
+
+# Restore proces of mysql backup databases
+connect to database
+mysql -u root -p
+show databses;
+drop database {database-name};
+show databses;
+exit
+
+#Restore cmd
+mysql -u root -p <./mysql_dbBackup1.sql
+
+#Now you can check databases to check it pls login in databases
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+mysql -u root -p
+
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#Backup Multiple MySQL Databases
+++++++++++++++++++++++++++++++++++ 
+mysqldump -u root -p --databases database_name_a database_name_b > databases_a_b.sql
+
+
+#Backup All MySQL Databases
+++++++++++++++++++++++++++
+mysqldump -u root -p --all-databases > all_databases.sql
+
+#Backup all MySQL databases to separate files
++++++++++++++++++++++++++++++++++++++++++++++
+for DB in $(mysql -e 'show databases' -s --skip-column-names); do
+    mysqldump $DB > "$DB.sql";
+done
+
+
+#Create a Compressed MySQL Database Backup
++++++++++++++++++++++++++++++++++++++++++++
+mysqldump database_name | gzip > database_name.sql.gz
+
+#Create a Backup with Timestamp 
+++++++++++++++++++++++++++++++++
+If you want to keep more than one backup in the same location, then you can add the current date to the backup filename:
+mysqldump  database_name > database_name-$(date +%Y%m%d).sql
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++=
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++===
+
+Automate Backups with Cron
+++++++++++++++++++++++++++++++
+Automating the process of backing up the databases is as simple as creating a cron job what will run the mysqldump command at specified time.
+
+To set up automated backups of a MySQL database using cronjob, follow the steps below:
+
+Create a file named .my.cnf in your user home directory:
+++++++++++++++++++++++++++++++++++++++++++++++++++++++=
+
+sudo nano ~/.my.cnf
+Copy
+Copy and paste the following text into the .my.cnf file.
+
+[client]
+user = dbuser
+password = dbpasswd
+
+Copy
+Do not forget to replace dbuser and dbpasswdwith the database user and user’s password.
+
+Restrict permissions of the credentials file so that only your user has access to it:
+
+chmod 600 ~/.my.cnf
+Copy
+Create a directory to store the backups:
+
+mkdir ~/db_backups
+Copy
+Open your user crontab file:
+
+crontab -e
+Copy
+Add the following cron job that will create a backup of a database name mydb every day at 3am:
+
+0 3 * * * /usr/bin/mysqldump -u dbuser mydb > /home/username/db_backups/mydb-$(date +\%Y\%m\%d).sql
+Copy
+Do not forget to replace username with your actual user name. We’re also escaping the percent-signs (%), because they have special meaning in crontab.
+
+You can also create another cronjob to delete any backups older than 30 days:
+
+find /path/to/backups -type f -name "*.sql" -mtime +30 -delete
+Copy
+Of course, you need to adjust the command according to your backup location and file names. To learn more about the find command check our How to Find Files in Linux Using the Command Line guide.
